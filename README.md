@@ -1,2 +1,2 @@
-# Photo segregator
-Application for segregating photos in given date range.
+# Photo organizer
+Application for ordering photos in given date range and copying them to new created folder.
