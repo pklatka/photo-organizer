@@ -1,4 +1,4 @@
-from modules.PhotoSegregator import *
+from modules.photo_segregator import *
 from datetime import date
 
 date_ranges = [
