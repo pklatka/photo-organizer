@@ -1,6 +1,6 @@
 """PhotoSegregator module for manipulating files"""
 
-import PIL.Image
+from PIL import Image, ImageChops
 from datetime import date
 from shutil import copy2
 from os import walk, path, mkdir, listdir
@@ -32,7 +32,7 @@ def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, s
             try:
                 # Get EXIF file data
                 tmp_path = path.join(dirpath, filename)
-                img = PIL.Image.open(tmp_path)
+                img = Image.open(tmp_path)
                 exif_data = img._getexif()
                 # Get year, month and day from EXIF dictionary
                 year, month, day = exif_data[36867][:10].split(':')
@@ -63,3 +63,16 @@ def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, s
                 error_file_list.append(filename)
                 continue
     return error_file_list
+
+def compare_photos(path_1:str,path_2:str) -> bool:
+    """Compare two photos.
+        If photos are different return true
+        else retrun False
+    """
+    img_1 = Image.open(path_1)
+    img_2 = Image.open(path_2)
+    diff = ImageChops.difference(img_1,img_2)
+    if diff.getbbox() != None:
+        return True
+    else:
+        return False
