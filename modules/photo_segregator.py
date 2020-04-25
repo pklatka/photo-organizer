@@ -1,11 +1,13 @@
 """PhotoSegregator module for manipulating files"""
 
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops,ImageStat
 from datetime import date
 from shutil import copy2
 from os import walk, path, mkdir, listdir
 
-permitted_ext = ('.jpg','.jpeg','.tiff','.gif','.png','.psd','.bmp','.raw','.cr2','.crw','.pict','.xmp','.dng')
+permitted_ext = (
+'.jpg', '.jpeg', '.tiff', '.gif', '.png', '.psd', '.bmp', '.raw', '.cr2', '.crw', '.pict', '.xmp', '.dng')
+
 
 def get_root_path_file_number(root_path: str) -> int:
     """Function gets number of files in paths directories and subdirectories"""
@@ -19,7 +21,7 @@ def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, s
     """Copies all files (including subdirectories)
      from given path to destination path
      without any loss of data
-     and sorts them into given subdirectories.
+     and groups them into given subdirectories.
      """
     if save_unsorted:
         size_checked_dirs = {'Unsorted': 1}
@@ -28,8 +30,10 @@ def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, s
     error_file_list = []
     for dirpath, dirnames, filenames in walk(root_path):
         # Get files only with jpg extension
-        for filename in [f for f in filenames if f.endswith(permitted_ext)]:
+        for filename in filenames:
             try:
+                if not filename.endswith(permitted_ext):
+                    continue
                 # Get EXIF file data
                 tmp_path = path.join(dirpath, filename)
                 img = Image.open(tmp_path)
@@ -64,15 +68,30 @@ def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, s
                 continue
     return error_file_list
 
-def compare_photos(path_1:str,path_2:str) -> bool:
-    """Compare two photos.
-        If photos are different return true
-        else retrun False
+
+def find_duplicates(root_path:str):
+    """Remove duplicate photos by substracting
+    sum of all pixels for each band in the image.
     """
-    img_1 = Image.open(path_1)
-    img_2 = Image.open(path_2)
-    diff = ImageChops.difference(img_1,img_2)
-    if diff.getbbox() != None:
-        return True
-    else:
-        return False
+    # Prepare dict with ImageObjects
+    photos = {}
+    for dirpath, dirnames, filenames in walk(root_path):
+        # Get files only with permitted extension
+        for filename in filenames:
+            if not filename.endswith(permitted_ext):
+                continue
+            else:
+                img_path = path.join(dirpath, filename)
+                img = Image.open(img_path)
+                photos[img_path] = img
+    duplicates = []
+    p = list(photos.keys())
+    for i in range(len(p)):
+        for j in range(i+1,len(p)):
+            diff = sum(ImageStat.Stat(photos[p[i]])._getsum())-sum(ImageStat.Stat(photos[p[j]])._getsum())
+            if diff == 0.0:
+                duplicates.append([p[i], p[j]])
+            else:
+                continue
+    return duplicates
+
