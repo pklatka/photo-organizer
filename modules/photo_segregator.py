@@ -6,31 +6,35 @@ from datetime import date
 from shutil import copy2
 from os import walk, path, mkdir, listdir
 
+# Allowed file extensions
 permitted_ext = (
     '.jpg', '.jpeg', '.tiff', '.gif', '.png', '.psd', '.bmp', '.raw', '.cr2', '.crw', '.pict', '.xmp', '.dng')
+# Progress value
+progress_bar = 0
 
-
-def get_root_path_file_number(root_path: str) -> int:
+def get_file_number(root_path: str) -> int:
     """Function gets number of files in paths directories and subdirectories with permitted extension"""
     sum = 0
     for f in walk(root_path):
         sum += len([x for x in f[2] if x.endswith(permitted_ext)])
     return sum
 
-def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, save_unsorted: bool = True) -> list:
+def order_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, save_unsorted: bool = True) -> list:
     """Copies all files (including subdirectories)
      from given path to destination path
      without any loss of data
      and groups them into given subdirectories.
      """
+    error_file_list = []
+    progress_bar = 0
     if save_unsorted:
         size_checked_dirs = {'Unsorted': 1}
     else:
         size_checked_dirs = {}
-    error_file_list = []
     for dirpath, dirnames, filenames in walk(root_path):
         # Get files only with jpg extension
         for filename in filenames:
+            progress_bar += 1
             try:
                 if not filename.endswith(permitted_ext):
                     continue
@@ -69,11 +73,11 @@ def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, s
     return error_file_list
 
 
-# noinspection PyProtectedMember
 def find_duplicates(root_path:str):
     """Remove duplicate photos by substracting
     sum of all pixels for each band in the image.
     """
+    progress_bar = 0
     # Prepare dict with ImageObjects
     photos = {}
     for dirpath, dirnames, filenames in walk(root_path):
@@ -90,6 +94,7 @@ def find_duplicates(root_path:str):
     # O(n^2) algorithm
     for i in range(len(p)):
         for j in range(i+1,len(p)):
+            progress_bar += 1
             # Faster expression than difference method in ImageChops module
             diff = sum(Stat(photos[p[i]])._getsum())-sum(Stat(photos[p[j]])._getsum())
             if diff == 0.0:
