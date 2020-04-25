@@ -1,21 +1,21 @@
 """PhotoSegregator module for manipulating files"""
 
-from PIL import Image, ImageChops,ImageStat
+from PIL import Image
+from PIL.ImageStat import Stat
 from datetime import date
 from shutil import copy2
 from os import walk, path, mkdir, listdir
 
 permitted_ext = (
-'.jpg', '.jpeg', '.tiff', '.gif', '.png', '.psd', '.bmp', '.raw', '.cr2', '.crw', '.pict', '.xmp', '.dng')
+    '.jpg', '.jpeg', '.tiff', '.gif', '.png', '.psd', '.bmp', '.raw', '.cr2', '.crw', '.pict', '.xmp', '.dng')
 
 
 def get_root_path_file_number(root_path: str) -> int:
-    """Function gets number of files in paths directories and subdirectories"""
+    """Function gets number of files in paths directories and subdirectories with permitted extension"""
     sum = 0
     for f in walk(root_path):
         sum += len([x for x in f[2] if x.endswith(permitted_ext)])
     return sum
-
 
 def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, save_unsorted: bool = True) -> list:
     """Copies all files (including subdirectories)
@@ -69,6 +69,7 @@ def copy_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, s
     return error_file_list
 
 
+# noinspection PyProtectedMember
 def find_duplicates(root_path:str):
     """Remove duplicate photos by substracting
     sum of all pixels for each band in the image.
@@ -86,12 +87,13 @@ def find_duplicates(root_path:str):
                 photos[img_path] = img
     duplicates = []
     p = list(photos.keys())
+    # O(n^2) algorithm
     for i in range(len(p)):
         for j in range(i+1,len(p)):
-            diff = sum(ImageStat.Stat(photos[p[i]])._getsum())-sum(ImageStat.Stat(photos[p[j]])._getsum())
+            # Faster expression than difference method in ImageChops module
+            diff = sum(Stat(photos[p[i]])._getsum())-sum(Stat(photos[p[j]])._getsum())
             if diff == 0.0:
-                duplicates.append([p[i], p[j]])
+                duplicates.append((p[i], p[j]))
             else:
                 continue
     return duplicates
-
