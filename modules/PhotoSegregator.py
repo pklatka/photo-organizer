@@ -34,10 +34,10 @@ def order_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, 
     for dirpath, dirnames, filenames in walk(root_path):
         # Get files only with jpg extension
         for filename in filenames:
-            progress_bar += 1
             try:
                 if not filename.endswith(permitted_ext):
                     continue
+                progress_bar += 1
                 # Get EXIF file data
                 tmp_path = path.join(dirpath, filename)
                 img = Image.open(tmp_path)
