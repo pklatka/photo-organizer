@@ -12,7 +12,7 @@ def clear_terminal():
 
 # Start main script
 try:
-    print("Photo organizer\n(C) Patryk Klatka 2020\n*****************\n\n")
+    print("Photo organizer\n(C) Patryk Klatka 2020\n")
     input("Naciśnij dowolny klawisz aby kontynuować... ")
     choise = 1
     while choise != "0":
@@ -27,12 +27,11 @@ try:
                 if load_file == 't':
                     save_unsorted = ''
                     while save_unsorted != 't' and save_unsorted != 'n':
-                        save_unsorted = input(
-                            "Czy chcesz utworzyć osobny folder ze zdjęciami nieposortowanymi [t/n]: ").lower()
-                        if save_unsorted == 't':
-                            save_unsorted = True
-                        elif save_unsorted == 'f':
-                            save_unsorted = False
+                        save_unsorted = input("Czy chcesz utworzyć osobny folder ze zdjęciami nieposortowanymi [t/n]: ").lower()
+                    if save_unsorted == 't':
+                        save_unsorted = True
+                    elif save_unsorted == 'f':
+                        save_unsorted = False
                     path = ''
                     path = pg.ask_for_file("Podaj lokalizację pliku")
                     date_ranges = []
