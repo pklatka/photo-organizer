@@ -108,12 +108,12 @@ try:
                     dir_name = f'{path}/duplikaty'
                     if not os.path.exists(dir_name):
                         os.mkdir(dir_name)
-                    print("Przenoszenie duplikatów")
+                    print("\nPrzenoszenie duplikatów")
                     err_list = ps.move_duplicates(dir_name,files_to_move)
                     if len(err_list) == 0:
                         print("\nWszystkie pliki przeniesiono poprawnie!")
                     else:
-                        print(str(len(err_list)) + " plików nie zostało pomyślnie przeniesionych!")
+                        print('\n'+str(len(err_list)) + " plików nie zostało pomyślnie przeniesionych!")
                         with open('logs.txt', "w", encoding="utf-8") as f:
                             f.write("Nieprzeniesione pliki:\n")
                             for e in err_list:

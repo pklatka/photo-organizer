@@ -80,24 +80,22 @@ def find_duplicates(root_path:str):
     """Remove duplicate photos by substracting
     sum of all pixels for each band in the image.
     """
-    t = tqdm(range(get_file_number(root_path)),unit=' img')
     # Prepare dict with ImageObjects
     photos = {}
-    for dirpath, dirnames, filenames in walk(root_path):
+    for filename in listdir(root_path):
         # Get files only with permitted extension
-        for filename in filenames:
-            if not filename.endswith(permitted_ext):
-                continue
-            else:
-                img_path = path.join(dirpath, filename).replace('\\','/')
-                img = Image.open(img_path)
-                photos[img_path] = img
+        if not filename.endswith(permitted_ext):
+            continue
+        else:
+            img_path = path.join(root_path, filename).replace('\\','/')
+            img = Image.open(img_path)
+            photos[img_path] = img
+    t = tqdm(range(len(photos)),unit=' img')
     duplicates = []
     p = list(photos.keys())
     # O(n^2) algorithm
     for i in range(len(p)):
         for j in range(i+1,len(p)):
-            t.update(1)
             # Faster expression than difference method in ImageChops module
             img1 = sum(Stat(photos[p[i]])._getsum())
             diff = img1 - sum(Stat(photos[p[j]])._getsum())
@@ -112,12 +110,14 @@ def find_duplicates(root_path:str):
                         duplicates[exists_tuple[0]].append(p[j])
             else:
                 continue
+        t.update(1)
     if len(duplicates) > 0:
         for duplicate in duplicates:
             duplicate.pop(0)
     return duplicates
 
 def move_duplicates(dest_path:str, duplicates:list):
+    t = tqdm(range(len(duplicates)),unit=' img')
     err = []
     for duplicate in duplicates:
         for file in duplicate:
@@ -126,4 +126,5 @@ def move_duplicates(dest_path:str, duplicates:list):
                 replace(file,move_path)
             except:
                err.append(move_path)
+            t.update(1)
     return err
