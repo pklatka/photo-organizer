@@ -17,7 +17,7 @@ try:
     choise = 1
     while choise != "0":
         clear_terminal()
-        print("\nWybierz opcję:\n[0] - Wyjście\n[1] - Sortowanie zdjęć\n[2] - Usuwanie duplikatów\n")
+        print("\nWybierz opcję:\n[0] - Wyjście\n[1] - Sortowanie zdjęć\n[2] - Lista duplikatów\n[3] - Usuwanie duplikatów\n")
         choise = input("Twój wybór: ")
         # Sort photos by date
         if choise == "1":
@@ -62,11 +62,65 @@ try:
                     os.startfile(path)
                     print("Wypełnij plik i spróbuj ponownie później!")
                     input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+        # Duplicate list
         elif choise == "2":
-            print("Ta opcja jeszcze nie jest dostępna!")
+            dirs_num = ''
+            while not dirs_num.isdigit():
+                dirs_num = input("Podaj liczbę katalogów do sprawdzenia duplikatów: ")
+            dirs_num = int(dirs_num)
+            dirs = []
+            for i in range(1,dirs_num+1):
+                dir_path = pg.ask_for_dir(f'Wybierz folder nr {i}')
+                dirs.append(dir_path)
+            for i,path in enumerate(dirs):
+                print(f'Folder nr {i+1}')
+                duplicates = ps.find_duplicates(path)
+                if len(duplicates) == 0:
+                    print("\nBrak duplikatów!")
+                else:
+                    with open(f'duplikaty-nr-{i+1}.txt', "w", encoding="utf-8") as f:
+                        f.write(f'Katalog: {path}')
+                        for j,duplicate in enumerate(duplicates):
+                            f.write(f'\n#{j+1} {"; ".join(duplicate)}')
+                    print(f"\nZnaleziono duplikaty! Ścieżki podano w utworzonym pliku tekstowym (duplikaty-nr-{i+1}.txt)!")
+            input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+        # Move duplicates
+        elif choise == "3":
+            dirs_num = ''
+            while not dirs_num.isdigit():
+                dirs_num = input("Podaj liczbę katalogów do sprawdzenia duplikatów: ")
+            dirs_num = int(dirs_num)
+            dirs = []
+            for i in range(1,dirs_num+1):
+                dir_path = pg.ask_for_dir(f'Wybierz folder nr {i}')
+                dirs.append(dir_path)
+            for i,path in enumerate(dirs):
+                print(f'Folder nr {i+1}')
+                duplicates = ps.find_duplicates(path)
+                if len(duplicates) == 0:
+                    print("\nBrak duplikatów!")
+                else:
+                    files_to_move = []
+                    for d in duplicates:
+                        file_to_save = min(d,key=len)
+                        d.remove(file_to_save)
+                        files_to_move.append(d)
+                    dir_name = f'{path}/duplikaty'
+                    if not os.path.exists(dir_name):
+                        os.mkdir(dir_name)
+                    print("Przenoszenie duplikatów")
+                    err_list = ps.move_duplicates(dir_name,files_to_move)
+                    if len(err_list) == 0:
+                        print("\nWszystkie pliki przeniesiono poprawnie!")
+                    else:
+                        print(str(len(err_list)) + " plików nie zostało pomyślnie przeniesionych!")
+                        with open('logs.txt', "w", encoding="utf-8") as f:
+                            f.write("Nieprzeniesione pliki:\n")
+                            for e in err_list:
+                                f.write(e + '\n')
             input("\nNaciśnij dowolny klawisz aby kontynuować... ")
 
-
-except:
+except Exception as e:
+    print(str(e))
     print("\nCoś poszło nie tak! Spróbuj ponownie później!")
     input("\nNaciśnij dowolny klawisz aby kontynuować... ")

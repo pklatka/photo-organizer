@@ -4,7 +4,7 @@ from PIL import Image
 from PIL.ImageStat import Stat
 from datetime import date
 from shutil import copy2
-from os import walk, path, mkdir, listdir
+from os import walk, path, mkdir, listdir, replace
 from tqdm import tqdm
 
 # Allowed file extensions
@@ -89,7 +89,7 @@ def find_duplicates(root_path:str):
             if not filename.endswith(permitted_ext):
                 continue
             else:
-                img_path = path.join(dirpath, filename)
+                img_path = path.join(dirpath, filename).replace('\\','/')
                 img = Image.open(img_path)
                 photos[img_path] = img
     duplicates = []
@@ -99,9 +99,31 @@ def find_duplicates(root_path:str):
         for j in range(i+1,len(p)):
             t.update(1)
             # Faster expression than difference method in ImageChops module
-            diff = sum(Stat(photos[p[i]])._getsum())-sum(Stat(photos[p[j]])._getsum())
+            img1 = sum(Stat(photos[p[i]])._getsum())
+            diff = img1 - sum(Stat(photos[p[j]])._getsum())
             if diff == 0.0:
-                duplicates.append((p[i], p[j]))
+                exists_tuple = [i for i,x in enumerate(duplicates) if x[0] == img1]
+                if len(exists_tuple) == 0:
+                    duplicates.append([img1,p[i], p[j]])
+                else:
+                    if p[i] not in duplicates[exists_tuple[0]]:
+                        duplicates[exists_tuple[0]].append(p[i])
+                    if p[j] not in duplicates[exists_tuple[0]]:
+                        duplicates[exists_tuple[0]].append(p[j])
             else:
                 continue
+    if len(duplicates) > 0:
+        for duplicate in duplicates:
+            duplicate.pop(0)
     return duplicates
+
+def move_duplicates(dest_path:str, duplicates:list):
+    err = []
+    for duplicate in duplicates:
+        for file in duplicate:
+            move_path = dest_path+'/'+file.split('/')[-1]
+            try:
+                replace(file,move_path)
+            except:
+               err.append(move_path)
+    return err
