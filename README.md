@@ -6,3 +6,6 @@ You can download the app [here](https://github-production-release-asset-2e65be.s
 ### Features
 - Ordering in given date range
 - Removing image duplicates 
+- List duplicates into text file
+
+
