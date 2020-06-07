@@ -17,7 +17,7 @@ try:
     choise = 1
     while choise != "0":
         clear_terminal()
-        print("\nWybierz opcję:\n[0] - Wyjście\n[1] - Sortowanie zdjęć\n[2] - Lista duplikatów\n[3] - Usuwanie duplikatów\n")
+        print("\nWybierz opcję:\n[0] - Wyjście\n[1] - Sortowanie zdjęć\n[2] - Lista duplikatów\n[3] - Usuwanie duplikatów\n[4] - Wyodrębnienie obrazów\n")
         choise = input("Twój wybór: ")
         # Sort photos by date
         if choise == "1":
@@ -118,6 +118,28 @@ try:
                             f.write("Nieprzeniesione pliki:\n")
                             for e in err_list:
                                 f.write(e + '\n')
+            input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+        # Move photos to separate folder
+        elif choise == "4":
+            dirs_num = ''
+            while not dirs_num.isdigit():
+                dirs_num = input("Podaj liczbę katalogów do sprawdzenia duplikatów: ")
+            dirs_num = int(dirs_num)
+            dirs = []
+            for i in range(1, dirs_num + 1):
+                dir_path = pg.ask_for_dir(f'Wybierz folder nr {i}')
+                dirs.append(dir_path)
+            for i, path in enumerate(dirs):
+                print(f'Folder nr {i + 1}')
+                err = ps.segregate_photos(path)
+                if len(err) == 0:
+                    print("Pliki posegregowano pomyślnie!")
+                else:
+                    print('\n' + str(len(err)) + " plików nie zostało pomyślnie przeniesionych!")
+                    with open('logs.txt', "w", encoding="utf-8") as f:
+                        f.write("Nieprzeniesione pliki:\n")
+                        for e in err:
+                            f.write(e + '\n')
             input("\nNaciśnij dowolny klawisz aby kontynuować... ")
 
 except Exception as e:

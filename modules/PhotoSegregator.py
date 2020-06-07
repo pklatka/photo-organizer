@@ -128,3 +128,23 @@ def move_duplicates(dest_path:str, duplicates:list):
                err.append(move_path)
             t.update(1)
     return err
+
+def segregate_photos(root_path:str):
+    dst_path = root_path + '/other'
+    if not path.exists(dst_path):
+        mkdir(dst_path)
+    files = listdir(root_path)
+    t = tqdm(range(len(files)),unit=' img')
+    err = []
+    for filename in files:
+        t.update(1)
+        try:
+            file_path = path.join(root_path, filename).replace('\\', '/')
+            # Get files only with permitted extension
+            if not filename.endswith(permitted_ext) and not path.isdir(file_path):
+                replace(file_path, root_path + '/other/' + filename)
+            else:
+                continue
+        except:
+            err.append(filename)
+    return err
