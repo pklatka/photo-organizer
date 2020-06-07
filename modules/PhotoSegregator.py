@@ -6,7 +6,7 @@ from datetime import date
 from shutil import copy2
 from os import walk, path, mkdir, listdir, replace
 from tqdm import tqdm
-
+from sys import stdout
 # Allowed file extensions
 permitted_ext = (
     '.jpg', '.jpeg', '.tiff', '.gif', '.png', '.psd', '.bmp', '.raw', '.cr2', '.crw', '.pict', '.xmp', '.dng')
@@ -24,7 +24,7 @@ def order_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, 
      without any loss of data
      and groups them into given subdirectories.
      """
-    t = tqdm(range(get_file_number(root_path)),unit=' img',desc='Progress')
+    t = tqdm(range(get_file_number(root_path)),unit=' img',desc='Progress',file=stdout)
     error_file_list = []
     if save_unsorted:
         size_checked_dirs = {'Unsorted': 1}
@@ -37,6 +37,7 @@ def order_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, 
                 if not filename.endswith(permitted_ext):
                     continue
                 t.update(1)
+                t.refresh()
                 # Get EXIF file data
                 tmp_path = path.join(dirpath, filename)
                 img = Image.open(tmp_path)
@@ -73,6 +74,7 @@ def order_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, 
             except:
                 error_file_list.append(tmp_path)
                 continue
+    t.close()
     return error_file_list
 
 
@@ -82,42 +84,55 @@ def find_duplicates(root_path:str):
     """
     # Prepare dict with ImageObjects
     photos = {}
-    for filename in listdir(root_path):
+    print("\nIndeksowanie plików...")
+    files = listdir(root_path)
+    t1 = tqdm(range(len(files)),unit=' img',file=stdout,desc='Progress')
+    for filename in files:
         # Get files only with permitted extension
+        t1.update(1)
+        t1.refresh()
         if not filename.endswith(permitted_ext):
             continue
         else:
             img_path = path.join(root_path, filename).replace('\\','/')
             img = Image.open(img_path)
-            photos[img_path] = img
-    t = tqdm(range(len(photos)),unit=' img')
+            photos[img_path] = sum(Stat(img)._getsum())
+    t1.close()
+    print("\nSprawdzanie plików...")
+    t2 = tqdm(range(len(photos)),unit=' img',desc='Progress',file=stdout)
     duplicates = []
     p = list(photos.keys())
     # O(n^2) algorithm
     for i in range(len(p)):
         for j in range(i+1,len(p)):
             # Faster expression than difference method in ImageChops module
-            img1 = sum(Stat(photos[p[i]])._getsum())
-            diff = img1 - sum(Stat(photos[p[j]])._getsum())
-            if diff == 0.0:
-                exists_tuple = [i for i,x in enumerate(duplicates) if x[0] == img1]
-                if len(exists_tuple) == 0:
-                    duplicates.append([img1,p[i], p[j]])
+            try:
+                img1 = photos[p[i]]
+                diff = img1 - photos[p[j]]
+                if diff == 0.0:
+                    exists_tuple = [i for i,x in enumerate(duplicates) if x[0] == img1]
+                    if len(exists_tuple) == 0:
+                        duplicates.append([img1,p[i], p[j]])
+                    else:
+                        if p[i] not in duplicates[exists_tuple[0]]:
+                            duplicates[exists_tuple[0]].append(p[i])
+                        if p[j] not in duplicates[exists_tuple[0]]:
+                            duplicates[exists_tuple[0]].append(p[j])
                 else:
-                    if p[i] not in duplicates[exists_tuple[0]]:
-                        duplicates[exists_tuple[0]].append(p[i])
-                    if p[j] not in duplicates[exists_tuple[0]]:
-                        duplicates[exists_tuple[0]].append(p[j])
-            else:
-                continue
-        t.update(1)
+                    continue
+            except Exception as e:
+                print(str(e))
+        t2.update(1)
+        t2.refresh()
     if len(duplicates) > 0:
         for duplicate in duplicates:
             duplicate.pop(0)
+    t2.close()
     return duplicates
 
 def move_duplicates(dest_path:str, duplicates:list):
-    t = tqdm(range(len(duplicates)),unit=' img')
+    print("\nPrzenoszenie duplikatów...")
+    t = tqdm(range(len(duplicates)),unit=' img',desc='Progress',file=stdout)
     err = []
     for duplicate in duplicates:
         for file in duplicate:
@@ -127,6 +142,8 @@ def move_duplicates(dest_path:str, duplicates:list):
             except:
                err.append(move_path)
             t.update(1)
+            t.refresh()
+    t.close()
     return err
 
 def segregate_photos(root_path:str):
@@ -134,10 +151,11 @@ def segregate_photos(root_path:str):
     if not path.exists(dst_path):
         mkdir(dst_path)
     files = listdir(root_path)
-    t = tqdm(range(len(files)),unit=' img')
+    t = tqdm(range(len(files)),unit=' img',desc='Progress',file=stdout)
     err = []
     for filename in files:
         t.update(1)
+        t.refresh()
         try:
             file_path = path.join(root_path, filename).replace('\\', '/')
             # Get files only with permitted extension
@@ -147,4 +165,5 @@ def segregate_photos(root_path:str):
                 continue
         except:
             err.append(filename)
+    t.close()
     return err

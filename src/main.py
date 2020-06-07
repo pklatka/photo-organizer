@@ -108,7 +108,6 @@ try:
                     dir_name = f'{path}/duplikaty'
                     if not os.path.exists(dir_name):
                         os.mkdir(dir_name)
-                    print("\nPrzenoszenie duplikatów")
                     err_list = ps.move_duplicates(dir_name,files_to_move)
                     if len(err_list) == 0:
                         print("\nWszystkie pliki przeniesiono poprawnie!")
