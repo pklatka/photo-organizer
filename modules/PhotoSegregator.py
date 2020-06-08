@@ -174,7 +174,8 @@ def segregate_photos(root_path:str):
         try:
             file_path = path.join(root_path, filename).replace('\\', '/')
             # Get files only with permitted extension
-            if not filename.endswith(permitted_ext) and not path.isdir(file_path):
+            check_filename = filename.lower()
+            if not check_filename.endswith(permitted_ext) and not path.isdir(file_path):
                 replace(file_path, root_path + '/other/' + filename)
             else:
                 continue
