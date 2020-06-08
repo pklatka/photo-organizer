@@ -37,7 +37,8 @@ def order_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, 
         # Get files only with jpg extension
         for filename in filenames:
             try:
-                if not filename.endswith(permitted_ext):
+                check_filename = filename.lower()
+                if not check_filename.endswith(permitted_ext):
                     continue
                 t.update(1)
                 t.refresh()
@@ -95,7 +96,8 @@ def find_duplicates(root_path:str):
         err = []
         t1.update(1)
         t1.refresh()
-        if not filename.endswith(permitted_ext):
+        check_filename = filename.lower()
+        if not check_filename.endswith(permitted_ext):
             continue
         else:
             try:
