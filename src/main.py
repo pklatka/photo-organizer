@@ -47,7 +47,7 @@ try:
                         print("Pomyślnie posortowano zdjęcia!")
                     else:
                         print(str(len(errors)) + " plików nie zostało pomyślnie posortowanych!")
-                        with open('logs.txt', "w", encoding="utf-8") as f:
+                        with open('logs-sorting.txt', "w", encoding="utf-8") as f:
                             for e in errors:
                                 f.write(e + '\n')
                     input("\nNaciśnij dowolny klawisz aby kontynuować... ")
@@ -95,7 +95,7 @@ try:
                 dir_path = pg.ask_for_dir(f'Wybierz folder nr {i}')
                 dirs.append(dir_path)
             for i,path in enumerate(dirs):
-                print(f'Folder nr {i+1}')
+                print(f'\nFolder nr {i+1}')
                 duplicates = ps.find_duplicates(path)
                 if len(duplicates) == 0:
                     print("\nBrak duplikatów!")
@@ -113,7 +113,7 @@ try:
                         print("\nWszystkie pliki przeniesiono poprawnie!")
                     else:
                         print('\n'+str(len(err_list)) + " plików nie zostało pomyślnie przeniesionych!")
-                        with open('logs.txt', "w", encoding="utf-8") as f:
+                        with open('logs-duplicates.txt', "w", encoding="utf-8") as f:
                             f.write("Nieprzeniesione pliki:\n")
                             for e in err_list:
                                 f.write(e + '\n')
@@ -129,13 +129,13 @@ try:
                 dir_path = pg.ask_for_dir(f'Wybierz folder nr {i}')
                 dirs.append(dir_path)
             for i, path in enumerate(dirs):
-                print(f'Folder nr {i + 1}')
+                print(f'\nFolder nr {i + 1}')
                 err = ps.segregate_photos(path)
                 if len(err) == 0:
                     print("Pliki posegregowano pomyślnie!")
                 else:
                     print('\n' + str(len(err)) + " plików nie zostało pomyślnie przeniesionych!")
-                    with open('logs.txt', "w", encoding="utf-8") as f:
+                    with open('logs-moving.txt', "w", encoding="utf-8") as f:
                         f.write("Nieprzeniesione pliki:\n")
                         for e in err:
                             f.write(e + '\n')

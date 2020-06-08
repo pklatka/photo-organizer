@@ -1,12 +1,15 @@
 """PhotoSegregator module for manipulating files"""
 
-from PIL import Image
+from PIL import Image, ImageFile
 from PIL.ImageStat import Stat
 from datetime import date
 from shutil import copy2
 from os import walk, path, mkdir, listdir, replace
 from tqdm import tqdm
 from sys import stdout
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 # Allowed file extensions
 permitted_ext = (
     '.jpg', '.jpeg', '.tiff', '.gif', '.png', '.psd', '.bmp', '.raw', '.cr2', '.crw', '.pict', '.xmp', '.dng')
@@ -89,15 +92,25 @@ def find_duplicates(root_path:str):
     t1 = tqdm(range(len(files)),unit=' img',file=stdout,desc='Progress')
     for filename in files:
         # Get files only with permitted extension
+        err = []
         t1.update(1)
         t1.refresh()
         if not filename.endswith(permitted_ext):
             continue
         else:
-            img_path = path.join(root_path, filename).replace('\\','/')
-            img = Image.open(img_path)
-            photos[img_path] = sum(Stat(img)._getsum())
+            try:
+                img_path = path.join(root_path, filename).replace('\\','/')
+                img = Image.open(img_path)
+                photos[img_path] = sum(Stat(img)._getsum())
+            except:
+                err.append(filename)
+                continue
     t1.close()
+    if len(err) > 0:
+        print("\nNie udało się zindexować wszystkich plików!\nLista plików dostępna w logs-indexing.txt")
+        with open('logs-indexing.txt', "w", encoding="utf-8") as f:
+            for e in err:
+                f.write(e + '\n')
     print("\nSprawdzanie plików...")
     t2 = tqdm(range(len(photos)),unit=' img',desc='Progress',file=stdout)
     duplicates = []
