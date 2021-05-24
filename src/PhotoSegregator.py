@@ -1,5 +1,9 @@
 """PhotoSegregator module for manipulating files"""
 
+# Used packages:
+#   - Pillow (https://github.com/python-pillow/Pillow)
+#   - tqdm (https://github.com/tqdm/tqdm)
+
 from PIL import Image, ImageFile
 from PIL.ImageStat import Stat
 from datetime import date
