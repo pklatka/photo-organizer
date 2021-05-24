@@ -68,6 +68,7 @@ def order_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, 
                         copy2(tmp_path, path.join(dir_path, f'{year}-{month}-{day} - {photo_id}.jpg'))
                         size_checked_dirs[dir_path][0] += 1
                         copied = True
+                        break
                 if save_unsorted and not copied:
                     dir_path = path.join(dest_path, 'Unsorted')
                     if not path.isdir(dir_path):
@@ -88,7 +89,7 @@ def find_duplicates(root_path:str):
     """
     # Prepare dict with ImageObjects
     photos = {}
-    print("\nIndeksowanie plików...")
+    print("\nIndexing files...")
     files = listdir(root_path)
     t1 = tqdm(range(len(files)),unit=' img',file=stdout,desc='Progress')
     for filename in files:
@@ -109,11 +110,11 @@ def find_duplicates(root_path:str):
                 continue
     t1.close()
     if len(err) > 0:
-        print("\nNie udało się zindexować wszystkich plików!\nLista plików dostępna w logs-indexing.txt")
+        print("\nFailed to index all files!\nFile list available in logs-indexing.txt")
         with open('logs-indexing.txt', "w", encoding="utf-8") as f:
             for e in err:
                 f.write(e + '\n')
-    print("\nSprawdzanie plików...")
+    print("\nChecking files...")
     t2 = tqdm(range(len(photos)),unit=' img',desc='Progress',file=stdout)
     duplicates = []
     p = list(photos.keys())
@@ -146,7 +147,7 @@ def find_duplicates(root_path:str):
     return duplicates
 
 def move_duplicates(dest_path:str, duplicates:list):
-    print("\nPrzenoszenie duplikatów...")
+    print("\nExtracting duplicates...")
     t = tqdm(range(len(duplicates)),unit=' img',desc='Progress',file=stdout)
     err = []
     for duplicate in duplicates:

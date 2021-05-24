@@ -1,4 +1,5 @@
-# Get path by using tkinter GUI
+"""Get path by using tkinter GUI"""
+
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, askdirectory
 

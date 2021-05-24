@@ -1,4 +1,4 @@
-# Main command line script
+"""Main command line script"""
 
 import PhotoSegregator as ps
 import PathGetter as pg
@@ -19,7 +19,7 @@ try:
     choice = 1
     while choice != "0":
         clear_terminal()
-        print("\nSelect option:\n[0] - Exit\n[1] - Sort photos by creation date\n[2] - Generate list with photo duplicates\n[3] - Remove photo dupliactes\n[4] - Segregate photos by date\n")
+        print("\nSelect option:\n[0] - Exit\n[1] - Sort and copy photos by creation date\n[2] - Generate list with photo duplicates\n[3] - Extract photo duplicates in a folder/s\n[4] - Extract other files than photos in a folder/s\n")
         choice = input("Your choice: ")
         # Sort photos by date
         if choice == "1":
@@ -80,11 +80,11 @@ try:
                 if len(duplicates) == 0:
                     print("\nNo photo duplicates!")
                 else:
-                    with open(f'duplicates-no-{i+1}.txt', "w", encoding="utf-8") as f:
+                    with open(os.path.join(path,f'duplicates-no-{i+1}.txt'), "w", encoding="utf-8") as f:
                         f.write(f'Directory: {path}')
                         for j,duplicate in enumerate(duplicates):
                             f.write(f'\n#{j+1} {"; ".join(duplicate)}')
-                    print(f"\nDuplicates found! Paths were provided in the text file (duplicates-no-{i+1}.txt) created!")
+                    print(f"\nDuplicates in folder no. {j+1} were found! Paths were provided in the text file created in folders directory.")
             input("\nPress any key to continue... ")
         # Move duplicates
         elif choice == "3":
