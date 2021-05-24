@@ -1,5 +1,7 @@
 # Main command line script
-from modules import PhotoSegregator as ps, PathGetter as pg
+
+import PhotoSegregator as ps
+import PathGetter as pg
 
 import os
 
@@ -12,136 +14,136 @@ def clear_terminal():
 
 # Start main script
 try:
-    print("Photo organizer\n(C) Patryk Klatka 2020\n")
-    input("Naciśnij dowolny klawisz aby kontynuować... ")
-    choise = 1
-    while choise != "0":
+    print("Photo organizer\n(C) Patryk Klatka 2021\n")
+    input("Press any key to continue... ")
+    choice = 1
+    while choice != "0":
         clear_terminal()
-        print("\nWybierz opcję:\n[0] - Wyjście\n[1] - Sortowanie zdjęć\n[2] - Lista duplikatów\n[3] - Usuwanie duplikatów\n[4] - Wyodrębnienie obrazów\n")
-        choise = input("Twój wybór: ")
+        print("\nSelect option:\n[0] - Exit\n[1] - Sort photos by creation date\n[2] - Generate list with photo duplicates\n[3] - Remove photo dupliactes\n[4] - Segregate photos by date\n")
+        choice = input("Your choice: ")
         # Sort photos by date
-        if choise == "1":
+        if choice == "1":
             load_file = ''
-            while load_file != 't' and load_file != 'n':
-                load_file = input("Czy posiadasz plik z przedziałami dat zdjęć oraz z nazwami folderów? [t/n]: ").lower()
-                if load_file == 't':
+            while load_file != 'y' and load_file != 'n':
+                load_file = input("Do you have a file with date ranges and folder names? [y/n]: ").lower()
+                if load_file == 'y':
                     save_unsorted = ''
-                    while save_unsorted != 't' and save_unsorted != 'n':
-                        save_unsorted = input("Czy chcesz utworzyć osobny folder ze zdjęciami nieposortowanymi [t/n]: ").lower()
-                    if save_unsorted == 't':
+                    while save_unsorted != 'y' and save_unsorted != 'n':
+                        save_unsorted = input("Do you want to create separate folder with unsorted photos? [y/n]: ").lower()
+                    if save_unsorted == 'y':
                         save_unsorted = True
-                    elif save_unsorted == 'f':
+                    elif save_unsorted == 'n':
                         save_unsorted = False
                     path = ''
-                    path = pg.ask_for_file("Podaj lokalizację pliku")
+                    path = pg.ask_for_file("Enter the location of the file")
                     date_ranges = []
                     file = open(path)
                     for l in file:
                         if "###" in l:
                             continue
                         date_ranges.append([f.strip() for f in l.split(',')])
-                    root_path = pg.ask_for_dir("Podaj folder ze zdjęciami do posortowania")
-                    dest_path = pg.ask_for_dir("Podaj folder docelowy")
+                    root_path = pg.ask_for_dir("Select a folder with photos to sort")
+                    dest_path = pg.ask_for_dir("Select destination folder")
                     errors = ps.order_files_by_ranges(root_path, dest_path, date_ranges, save_unsorted=save_unsorted)
                     if len(errors) == 0:
-                        print("Pomyślnie posortowano zdjęcia!")
+                        print("Images successfully sorted!")
                     else:
-                        print(str(len(errors)) + " plików nie zostało pomyślnie posortowanych!")
+                        print(str(len(errors)) + " files were not successfully sorted!")
                         with open('logs-sorting.txt', "w", encoding="utf-8") as f:
                             for e in errors:
                                 f.write(e + '\n')
-                    input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+                    input("\nPress any key to continue... ")
                 elif load_file == 'n':
-                    path = pg.ask_for_dir("Podaj miejsce zapisu pliku")
+                    path = pg.ask_for_dir("Specify where to save the file")
                     path += '/data.txt'
                     if not os.path.exists(path):
                         with open(path, "w", encoding="utf-8") as f:
-                            f.write("### Tutaj możesz podawać zakresy dat oraz nazwy folderów\n")
-                            f.write("### Wygląd jednego wpisu: Początkowa data , Końcowa data , Nazwa folderu\n")
-                            f.write("### np: 28.02.2001,29.02.2001,Folder 2001\n")
+                            f.write("### Here you can specify date ranges and folder names.\n")
+                            f.write("### Appearance of one entry: Start date (DD.MM.YYYY) , End date (DD.MM.YYYY) , Folder name.\n")
+                            f.write("### Example: 28.02.2001,29.02.2001,Photos 2001\n")
                     os.startfile(path)
-                    print("Wypełnij plik i spróbuj ponownie później!")
-                    input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+                    print("Fill out the file and try again later!")
+                    input("\nPress any key to continue... ")
         # Duplicate list
-        elif choise == "2":
+        elif choice == "2":
             dirs_num = ''
             while not dirs_num.isdigit():
-                dirs_num = input("Podaj liczbę katalogów do sprawdzenia duplikatów: ")
+                dirs_num = input("Specify the number of directories to check for photo duplicates: ")
             dirs_num = int(dirs_num)
             dirs = []
             for i in range(1,dirs_num+1):
-                dir_path = pg.ask_for_dir(f'Wybierz folder nr {i}')
+                dir_path = pg.ask_for_dir(f'Select folder no. {i}')
                 dirs.append(dir_path)
             for i,path in enumerate(dirs):
-                print(f'Folder nr {i+1}')
+                print(f'Folder no. {i+1}')
                 duplicates = ps.find_duplicates(path)
                 if len(duplicates) == 0:
-                    print("\nBrak duplikatów!")
+                    print("\nNo photo duplicates!")
                 else:
-                    with open(f'duplikaty-nr-{i+1}.txt', "w", encoding="utf-8") as f:
-                        f.write(f'Katalog: {path}')
+                    with open(f'duplicates-no-{i+1}.txt', "w", encoding="utf-8") as f:
+                        f.write(f'Directory: {path}')
                         for j,duplicate in enumerate(duplicates):
                             f.write(f'\n#{j+1} {"; ".join(duplicate)}')
-                    print(f"\nZnaleziono duplikaty! Ścieżki podano w utworzonym pliku tekstowym (duplikaty-nr-{i+1}.txt)!")
-            input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+                    print(f"\nDuplicates found! Paths were provided in the text file (duplicates-no-{i+1}.txt) created!")
+            input("\nPress any key to continue... ")
         # Move duplicates
-        elif choise == "3":
+        elif choice == "3":
             dirs_num = ''
             while not dirs_num.isdigit():
-                dirs_num = input("Podaj liczbę katalogów do sprawdzenia duplikatów: ")
+                dirs_num = input("Specify the number of directories to check for photo duplicates: ")
             dirs_num = int(dirs_num)
             dirs = []
             for i in range(1,dirs_num+1):
-                dir_path = pg.ask_for_dir(f'Wybierz folder nr {i}')
+                dir_path = pg.ask_for_dir(f'Select folder no. {i}')
                 dirs.append(dir_path)
             for i,path in enumerate(dirs):
-                print(f'\nFolder nr {i+1}')
+                print(f'\nFolder no. {i+1}')
                 duplicates = ps.find_duplicates(path)
                 if len(duplicates) == 0:
-                    print("\nBrak duplikatów!")
+                    print("\nNo photo duplicates!")
                 else:
                     files_to_move = []
                     for d in duplicates:
                         file_to_save = min(d,key=len)
                         d.remove(file_to_save)
                         files_to_move.append(d)
-                    dir_name = f'{path}/duplikaty'
+                    dir_name = f'{path}/duplicates'
                     if not os.path.exists(dir_name):
                         os.mkdir(dir_name)
                     err_list = ps.move_duplicates(dir_name,files_to_move)
                     if len(err_list) == 0:
-                        print("\nWszystkie pliki przeniesiono poprawnie!")
+                        print("\nAll files were transferred correctly!")
                     else:
-                        print('\n'+str(len(err_list)) + " plików nie zostało pomyślnie przeniesionych!")
+                        print('\n'+str(len(err_list)) + " files have not been transferred successfully!")
                         with open('logs-duplicates.txt', "w", encoding="utf-8") as f:
-                            f.write("Nieprzeniesione pliki:\n")
+                            f.write("Error files:\n")
                             for e in err_list:
                                 f.write(e + '\n')
-            input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+            input("\nPress any key to continue... ")
         # Move photos to separate folder
-        elif choise == "4":
+        elif choice == "4":
             dirs_num = ''
             while not dirs_num.isdigit():
-                dirs_num = input("Podaj liczbę katalogów do sprawdzenia duplikatów: ")
+                dirs_num = input("Enter the number of directories to check for duplicates: ")
             dirs_num = int(dirs_num)
             dirs = []
             for i in range(1, dirs_num + 1):
-                dir_path = pg.ask_for_dir(f'Wybierz folder nr {i}')
+                dir_path = pg.ask_for_dir(f'Select folder no. {i}')
                 dirs.append(dir_path)
             for i, path in enumerate(dirs):
-                print(f'\nFolder nr {i + 1}')
+                print(f'\nFolder no. {i + 1}')
                 err = ps.segregate_photos(path)
                 if len(err) == 0:
-                    print("Pliki posegregowano pomyślnie!")
+                    print("Files were sorted successfully!")
                 else:
-                    print('\n' + str(len(err)) + " plików nie zostało pomyślnie przeniesionych!")
+                    print('\n' + str(len(err)) + " files have not been transferred successfully!")
                     with open('logs-moving.txt', "w", encoding="utf-8") as f:
-                        f.write("Nieprzeniesione pliki:\n")
+                        f.write("Error files:\n")
                         for e in err:
                             f.write(e + '\n')
-            input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+            input("\nPress any key to continue... ")
 
 except Exception as e:
     print(str(e))
-    print("\nCoś poszło nie tak! Spróbuj ponownie później!")
-    input("\nNaciśnij dowolny klawisz aby kontynuować... ")
+    print("\nSomething went wrong... Please try again!")
+    input("\nPress any key to continue... ")

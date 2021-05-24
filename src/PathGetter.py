@@ -3,6 +3,7 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilename, askdirectory
 
 def ask_for_file(msg):
+    print(msg)
     root = Tk()
     root.withdraw()
     filename = ''
@@ -12,6 +13,7 @@ def ask_for_file(msg):
     return filename
 
 def ask_for_dir(msg):
+    print(msg)
     root = Tk()
     root.withdraw()
     filename = ''
