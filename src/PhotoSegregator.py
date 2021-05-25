@@ -56,23 +56,26 @@ def order_files_by_ranges(root_path: str, dest_path: str, date_ranges: list, *, 
                 # Else check if image was copied (why not for/else - user can select ranges that overlap each other)
                 copied = False
                 for n in date_ranges:
-                    d1 = n[0].split('.')
-                    d1 = date(int(d1[2]),int(d1[1]),int(d1[0]))
-                    d2 = n[1].split('.')
-                    d2 = date(int(d2[2]),int(d2[1]),int(d2[0]))
-                    if d1 <= date(int(year), int(month), int(day)) <= d2:
-                        dir_path = path.join(dest_path, n[2])
-                        # Get size of directory to estimate zfill value
-                        if dir_path not in size_checked_dirs.keys():
-                            size_checked_dirs[dir_path] = [1, len(str(len(listdir(dirpath))))]
-                        # Create folder if doesn't exists
-                        if not path.isdir(dir_path):
-                            mkdir(dir_path)
-                        photo_id = str(size_checked_dirs[dir_path][0]).zfill(size_checked_dirs[dir_path][1])
-                        copy2(tmp_path, path.join(dir_path, f'{year}-{month}-{day} - {photo_id}.jpg'))
-                        size_checked_dirs[dir_path][0] += 1
-                        copied = True
-                        break
+                    try:
+                        d1 = n[0].split('.')
+                        d1 = date(int(d1[2]),int(d1[1]),int(d1[0]))
+                        d2 = n[1].split('.')
+                        d2 = date(int(d2[2]),int(d2[1]),int(d2[0]))
+                        if d1 <= date(int(year), int(month), int(day)) <= d2:
+                            dir_path = path.join(dest_path, n[2])
+                            # Get size of directory to estimate zfill value
+                            if dir_path not in size_checked_dirs.keys():
+                                size_checked_dirs[dir_path] = [1, len(str(len(listdir(dirpath))))]
+                            # Create folder if doesn't exists
+                            if not path.isdir(dir_path):
+                                mkdir(dir_path)
+                            photo_id = str(size_checked_dirs[dir_path][0]).zfill(size_checked_dirs[dir_path][1])
+                            copy2(tmp_path, path.join(dir_path, f'{year}-{month}-{day} - {photo_id}.jpg'))
+                            size_checked_dirs[dir_path][0] += 1
+                            copied = True
+                            break
+                    except:
+                        continue
                 if save_unsorted and not copied:
                     dir_path = path.join(dest_path, 'Unsorted')
                     if not path.isdir(dir_path):
