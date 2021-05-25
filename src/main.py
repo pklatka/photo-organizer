@@ -19,7 +19,7 @@ try:
     choice = 1
     while choice != "0":
         clear_terminal()
-        print("\nSelect option:\n[0] - Exit\n[1] - Sort and copy photos by creation date\n[2] - Generate list with photo duplicates\n[3] - Extract photo duplicates in a folder/s\n[4] - Extract other files than photos in a folder/s\n")
+        print("\nSelect option:\n[0] - Exit\n[1] - Sort photos by creation date\n[2] - Generate list with photo duplicates\n[3] - Extract photo duplicates in a folder/s\n[4] - Extract other files than photos in a folder/s\n")
         choice = input("Your choice: ")
         # Sort photos by date
         if choice == "1":
@@ -43,7 +43,7 @@ try:
                             continue
                         date_ranges.append([f.strip() for f in l.split(',')])
                     root_path = pg.ask_for_dir("Select a folder with photos to sort")
-                    dest_path = pg.ask_for_dir("Select destination folder")
+                    dest_path = pg.ask_for_dir("Select the destination folder where the pictures will be copied to")
                     errors = ps.order_files_by_ranges(root_path, dest_path, date_ranges, save_unsorted=save_unsorted)
                     if len(errors) == 0:
                         print("Images successfully sorted!")
