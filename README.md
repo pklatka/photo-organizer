@@ -1,5 +1,6 @@
 # Photo organizer
-Application for ordering photos.
+
+Portable and lightweight application for photo segregation.
 
 You can download the app [here](https://github.com/pklatka/photo-organizer/releases)
 
